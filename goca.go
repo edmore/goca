@@ -12,9 +12,10 @@ import (
 )
 
 type Config struct {
-	AdminServerURL string
-	DigestUser     string
-	DigestPassword string
+	AdminServerURL string // the admin node URL
+	Name           string // the Capture Agent Name
+	DigestUser     string // Digest User
+	DigestPassword string // Digest Password
 }
 
 var config *Config
@@ -43,7 +44,7 @@ func main() {
 	// Register CA
 	req, err := http.NewRequest(
 		"POST",
-		config.AdminServerURL+"/capture-admin/agents/goca"+"?address=http://"+name+":8080&state=idle",
+		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+name+":8080&state=idle",
 		nil)
 	if err != nil {
 		log.Fatal(err)

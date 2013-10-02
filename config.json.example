@@ -1,1 +1,1 @@
-{"AdminServerURL":"http://server:8080","DigestUser":"user","DigestPassword":"password"}
+{"AdminServerURL":"http://server:8080","Name": "goca","DigestUser":"user","DigestPassword":"password"}
