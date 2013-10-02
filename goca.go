@@ -1,5 +1,4 @@
 // Go(lang) Matterhorn CA
-
 package main
 
 import (
@@ -42,7 +41,10 @@ func main() {
 	name, _ := os.Hostname()
 
 	// Register CA
-	req, err := http.NewRequest("POST", config.AdminServerURL+"/capture-admin/agents/goca"+"?address=http://"+name+":8080&state=idle", nil)
+	req, err := http.NewRequest(
+		"POST",
+		config.AdminServerURL+"/capture-admin/agents/goca"+"?address=http://"+name+":8080&state=idle",
+		nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,5 +62,4 @@ func main() {
 	}
 
 	// Print Schedule
-	select {}
 }

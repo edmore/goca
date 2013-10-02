@@ -1,6 +1,5 @@
 // package auth - Digest Authentication
 // http://play.golang.org/p/ABoHSHoTmu
-
 package auth
 
 import (
@@ -21,11 +20,9 @@ func GetAuthorization(username, password string, resp *http.Response) *Authoriza
 	header := resp.Header.Get("www-authenticate")
 	parts := strings.SplitN(header, " ", 2)
 	parts = strings.Split(parts[1], ", ")
-	fmt.Println("Parts: ", parts)
 	opts := make(map[string]string)
 
 	for _, part := range parts {
-		fmt.Println("Part: ", part)
 		vals := strings.SplitN(part, "=", 2)
 		key := vals[0]
 		val := strings.Trim(vals[1], "\",")
