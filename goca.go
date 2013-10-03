@@ -39,12 +39,12 @@ func main() {
 	fmt.Println(config.AdminServerURL)
 
 	client := &http.Client{}
-	name, _ := os.Hostname()
+	hostName, _ := os.Hostname()
 
 	// Register CA
 	req, err := http.NewRequest(
 		"POST",
-		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+name+":8080&state=idle",
+		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+hostName+":8080&state=idle",
 		nil)
 	if err != nil {
 		log.Fatal(err)
