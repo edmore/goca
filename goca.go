@@ -22,6 +22,8 @@ type Config struct {
 	DigestPassword string // Digest Password
 }
 
+type Event struct{}
+
 var config *Config
 
 func loadConfig() {
