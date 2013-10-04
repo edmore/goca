@@ -12,6 +12,7 @@ import (
 	"os"
 	//	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ type Event struct {
 	Dtstart  string
 	Dtend    string
 	Summary  string
-	Uid      string
+	Uid      int
 	Location string
 }
 
@@ -129,7 +130,7 @@ func main() {
 				case summary.Match(current):
 					e.Summary = strings.Split(scanner.Text(), ":")[1]
 				case uid.Match(current):
-					e.Uid = strings.Split(scanner.Text(), ":")[1]
+					e.Uid, _ = strconv.Atoi(strings.Split(scanner.Text(), ":")[1])
 				case location.Match(current):
 					e.Location = strings.Split(scanner.Text(), ":")[1]
 				}
