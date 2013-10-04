@@ -10,9 +10,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	//	"reflect"
 	"regexp"
 	"strings"
-	//"reflect"
 )
 
 type Config struct {
@@ -22,9 +22,17 @@ type Config struct {
 	DigestPassword string // Digest Password
 }
 
-type Event struct{}
+type Event struct {
+	Dtstamp  string
+	Dtstart  string
+	Dtend    string
+	Summary  string
+	Uid      string
+	Location string
+}
 
 var config *Config
+var events []*Event
 
 func loadConfig() {
 	file, err := ioutil.ReadFile("config.json")
@@ -40,13 +48,13 @@ func loadConfig() {
 }
 
 func main() {
-	// Load config
+	// [Load config]
 	loadConfig()
 
 	client := &http.Client{}
 	hostName, _ := os.Hostname()
 
-	// Register CA
+	// [Register CA]
 	req, err := http.NewRequest(
 		"POST",
 		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+hostName+":8080&state=idle",
@@ -66,7 +74,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Get Schedule
+	// [Get Schedule]
 	req, err = http.NewRequest(
 		"GET",
 		config.AdminServerURL+"/recordings/calendars?agentid="+config.Name,
@@ -93,13 +101,45 @@ func main() {
 	}
 	vcal := string(body)
 
-	// Read the cal line by line
+	// Read the ical line by line
 	cal := strings.NewReader(vcal)
 	scanner := bufio.NewScanner(cal)
 	for scanner.Scan() {
-		r, _ := regexp.Compile("VEVENT")
-		if r.Match([]byte(scanner.Text())) {
-			fmt.Println(scanner.Text())
+		begin, _ := regexp.Compile("^BEGIN:VEVENT")
+		dtstamp, _ := regexp.Compile("^DTSTAMP")
+		dtstart, _ := regexp.Compile("^DTSTART")
+		dtend, _ := regexp.Compile("^DTEND")
+		summary, _ := regexp.Compile("^SUMMARY")
+		uid, _ := regexp.Compile("^UID")
+		location, _ := regexp.Compile("^LOCATION")
+		end, _ := regexp.Compile("^END:VEVENT")
+
+		if begin.Match([]byte(scanner.Text())) {
+			e := new(Event)
+			scanner.Scan()
+			for !end.Match([]byte(scanner.Text())) {
+				current := []byte(scanner.Text())
+				switch {
+				case dtstamp.Match(current):
+					e.Dtstamp = strings.Split(scanner.Text(), ":")[1]
+				case dtstart.Match(current):
+					e.Dtstart = strings.Split(scanner.Text(), ":")[1]
+				case dtend.Match(current):
+					e.Dtend = strings.Split(scanner.Text(), ":")[1]
+				case summary.Match(current):
+					e.Summary = strings.Split(scanner.Text(), ":")[1]
+				case uid.Match(current):
+					e.Uid = strings.Split(scanner.Text(), ":")[1]
+				case location.Match(current):
+					e.Location = strings.Split(scanner.Text(), ":")[1]
+				}
+				scanner.Scan()
+			}
+			events = append(events, e)
 		}
+	}
+	// Print the events
+	for _, v := range events {
+		fmt.Println(v)
 	}
 }
