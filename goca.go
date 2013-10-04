@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"github.com/edmore/goca/auth"
@@ -9,8 +10,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-//	"reflect"
+	"regexp"
+	"strings"
+	//"reflect"
 )
 
 type Config struct {
@@ -62,7 +64,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Print Schedule
+	// Get Schedule
 	req, err = http.NewRequest(
 		"GET",
 		config.AdminServerURL+"/recordings/calendars?agentid="+config.Name,
@@ -80,7 +82,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	// Defer the closing of the body
 	defer resp.Body.Close()
 	// Read the content into a byte array
@@ -88,5 +89,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(body))
+	vcal := string(body)
+
+	// Read the cal line by line
+	cal := strings.NewReader(vcal)
+	scanner := bufio.NewScanner(cal)
+	for scanner.Scan() {
+		r, _ := regexp.Compile("VEVENT")
+		if r.Match([]byte(scanner.Text())) {
+			fmt.Println(scanner.Text())
+		}
+	}
 }
