@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+//	"reflect"
 )
 
 type Config struct {
@@ -36,7 +38,6 @@ func loadConfig() {
 func main() {
 	// Load config
 	loadConfig()
-	fmt.Println(config.AdminServerURL)
 
 	client := &http.Client{}
 	hostName, _ := os.Hostname()
@@ -56,11 +57,36 @@ func main() {
 	}
 	req = auth.SetDigestAuth(req, config.DigestUser, config.DigestPassword, resp, 1)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	fmt.Println("Request: ", req)
 	resp, err = client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Print Schedule
+	req, err = http.NewRequest(
+		"GET",
+		config.AdminServerURL+"/recordings/calendars?agentid="+config.Name,
+		nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("X-Requested-Auth", "Digest")
+	resp, err = client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req = auth.SetDigestAuth(req, config.DigestUser, config.DigestPassword, resp, 1)
+	resp, err = client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Defer the closing of the body
+	defer resp.Body.Close()
+	// Read the content into a byte array
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(body))
 }
