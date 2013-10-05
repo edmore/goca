@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -136,6 +137,8 @@ func main() {
 				}
 				scanner.Scan()
 			}
+			currentTime := time.Now().UTC()
+			fmt.Println(currentTime)
 			events = append(events, e)
 		}
 	}
