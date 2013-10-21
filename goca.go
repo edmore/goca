@@ -12,6 +12,7 @@ import (
 	"os"
 	//	"reflect"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -33,9 +34,21 @@ type Event struct {
 	Location string
 }
 
+type Events []*Event
+
+// for sorting
+func (s Events) Len() int      { return len(s) }
+func (s Events) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
+// ByDtstart implements sort.Interface by providing Less and using the Len and
+// Swap methods of the embedded Events value.
+type ByDtstart struct{ Events }
+
+func (s ByDtstart) Less(i, j int) bool { return s.Events[i].Dtstart.Before(s.Events[j].Dtstart) }
+
 var (
 	config *Config
-	events []*Event
+	events Events
 )
 
 const updateFrequency int = 60
@@ -153,6 +166,9 @@ func main() {
 			}
 		}
 	}
+	// sort the events
+	sort.Sort(ByDtstart{events})
+
 	// Print the events
 	for _, v := range events {
 		fmt.Println(v)
