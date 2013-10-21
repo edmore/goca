@@ -168,7 +168,6 @@ func main() {
 	}
 	// sort the events
 	sort.Sort(ByDtstart{events})
-
 	// Print the events
 	for _, v := range events {
 		fmt.Println(v)
