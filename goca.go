@@ -10,7 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	//	"reflect"
+//	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -25,7 +25,7 @@ type Config struct {
 }
 
 type Event struct {
-	Dtstamp  string
+	Dtstamp  time.Time
 	Dtstart  string
 	Dtend    string
 	Summary  string
@@ -123,7 +123,9 @@ func main() {
 				current := []byte(scanner.Text())
 				switch {
 				case dtstamp.Match(current):
-					e.Dtstamp = strings.Split(scanner.Text(), ":")[1]
+					layout := "20060102T150405Z"
+					t, _ := time.Parse(layout, strings.Split(scanner.Text(), ":")[1])
+					e.Dtstamp = t
 				case dtstart.Match(current):
 					e.Dtstart = strings.Split(scanner.Text(), ":")[1]
 				case dtend.Match(current):
