@@ -143,13 +143,16 @@ func main() {
 				}
 				scanner.Scan()
 			}
-			currentTime := time.Now().UTC()
-			fmt.Println(currentTime)
-			events = append(events, e)
+			// if the event has not passed
+			if e.Dtend.After(e.Dtstamp) {
+				events = append(events, e)
+			}
 		}
 	}
 	// Print the events
 	for _, v := range events {
 		fmt.Println(v)
 	}
+
+	// [Control Loop]
 }
