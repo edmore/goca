@@ -33,8 +33,10 @@ type Event struct {
 	Location string
 }
 
-var config *Config
-var events []*Event
+var (
+	config *Config
+	events []*Event
+)
 
 func loadConfig() {
 	file, err := ioutil.ReadFile("config.json")
