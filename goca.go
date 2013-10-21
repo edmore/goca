@@ -10,7 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-//	"reflect"
+	//	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,8 +26,8 @@ type Config struct {
 
 type Event struct {
 	Dtstamp  time.Time
-	Dtstart  string
-	Dtend    string
+	Dtstart  time.Time
+	Dtend    time.Time
 	Summary  string
 	Uid      int
 	Location string
@@ -47,6 +47,12 @@ func loadConfig() {
 		log.Println("parse config: ", err)
 	}
 	config = temp
+}
+
+func strToTime(s string) time.Time {
+	layout := "20060102T150405Z"
+	t, _ := time.Parse(layout, s)
+	return t
 }
 
 func main() {
@@ -123,13 +129,11 @@ func main() {
 				current := []byte(scanner.Text())
 				switch {
 				case dtstamp.Match(current):
-					layout := "20060102T150405Z"
-					t, _ := time.Parse(layout, strings.Split(scanner.Text(), ":")[1])
-					e.Dtstamp = t
+					e.Dtstamp = strToTime(strings.Split(scanner.Text(), ":")[1])
 				case dtstart.Match(current):
-					e.Dtstart = strings.Split(scanner.Text(), ":")[1]
+					e.Dtstart = strToTime(strings.Split(scanner.Text(), ":")[1])
 				case dtend.Match(current):
-					e.Dtend = strings.Split(scanner.Text(), ":")[1]
+					e.Dtend = strToTime(strings.Split(scanner.Text(), ":")[1])
 				case summary.Match(current):
 					e.Summary = strings.Split(scanner.Text(), ":")[1]
 				case uid.Match(current):
