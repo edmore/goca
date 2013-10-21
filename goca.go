@@ -38,6 +38,8 @@ var (
 	events []*Event
 )
 
+const updateFrequency int = 60
+
 func loadConfig() {
 	file, err := ioutil.ReadFile("config.json")
 	if err != nil {
