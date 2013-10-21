@@ -44,7 +44,9 @@ func (s Events) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 // Swap methods of the embedded Events value.
 type ByDtstart struct{ Events }
 
-func (s ByDtstart) Less(i, j int) bool { return s.Events[i].Dtstart.Before(s.Events[j].Dtstart) }
+func (s ByDtstart) Less(i, j int) bool {
+	return s.Events[i].Dtstart.Before(s.Events[j].Dtstart)
+}
 
 var (
 	config *Config
