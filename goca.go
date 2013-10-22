@@ -174,21 +174,45 @@ func getSchedule() {
 	ch <- events
 }
 
+func recordingState(recordingId, state string) {
+	client := &http.Client{}
+	req, err := http.NewRequest(
+		"POST",
+		config.AdminServerURL+"/capture-admin/recordings/"+recordingId+"?state="+state,
+		nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req.Header.Set("X-Requested-Auth", "Digest")
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	req = auth.SetDigestAuth(req, config.DigestUser, config.DigestPassword, resp, 1)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	resp, err = client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func startCapture(e *Event) {
 	now := getTimeStamp()
-	fmt.Println("Starting capture  id : %d", e.Uid)
+	fmt.Println("Starting capture  id : ", e.Uid)
 
 	duration := e.Dtend.Sub(now)
 	fmt.Println(duration)
-	recordingId := e.Uid
-	recordingName := "recording-" + strconv.Itoa(recordingId)
+	recordingId := strconv.Itoa(e.Uid)
+	recordingName := "recording-" + recordingId
 	recordingDir := config.CaptureDir + "/" + recordingName
 	os.MkdirAll(recordingDir, 0755)
 
-	// Set state
+	// Set CA state
 	state = "capturing"
 	go registerCA(state)
-	// TODO : change recording state
+	// Set recording status
+	go recordingState(recordingId, "capturing")
+
 	// TODO : record from streams
 }
 
@@ -217,8 +241,10 @@ func main() {
 			}
 		case <-time.After(2 * time.Second):
 			now := getTimeStamp()
-			if (now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart)) && state == "idle" {
-				go startCapture(scheduled[0])
+			if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
+				if state == "idle" {
+					go startCapture(scheduled[0])
+				}
 			}
 			if now.Sub(lastUpdate) > updateFrequency {
 				go getSchedule()
