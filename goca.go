@@ -71,6 +71,11 @@ func strToTime(s string) time.Time {
 	return t
 }
 
+func getTimeStamp() time.Time {
+	t := time.Now().UTC()
+	return t
+}
+
 func registerCA() {
 	client := &http.Client{}
 	hostName, _ := os.Hostname()
@@ -168,6 +173,10 @@ func getSchedule() {
 	ch <- events
 }
 
+func startCapture(e *Event){
+	fmt.Println("Starting capture  id : %d", e.Uid)
+}
+
 var ch = make(chan Events)
 
 func main() {
@@ -191,7 +200,10 @@ func main() {
 		case <-time.After(updateFrequency * time.Second):
 			go getSchedule()
 		case <-time.After(5 * time.Second):
-			fmt.Println("Check if you can start capture ...")
+			currentTime := getTimeStamp()
+			if currentTime.After(scheduled[0].Dtstart) || currentTime.Equal(scheduled[0].Dtstart){
+				go startCapture(scheduled[0])
+			}
 		}
 	}
 }
