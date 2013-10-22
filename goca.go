@@ -74,14 +74,9 @@ func strToTime(s string) time.Time {
 	return t
 }
 
-func main() {
-	// [Load config]
-	loadConfig()
-
+func registerCA() {
 	client := &http.Client{}
 	hostName, _ := os.Hostname()
-
-	// [Register CA]
 	req, err := http.NewRequest(
 		"POST",
 		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+hostName+":8080&state=idle",
@@ -100,9 +95,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
 
-	// [Get Schedule]
-	req, err = http.NewRequest(
+func getSchedule() Events {
+	client := &http.Client{}
+	req, err := http.NewRequest(
 		"GET",
 		config.AdminServerURL+"/recordings/calendars?agentid="+config.Name,
 		nil)
@@ -110,7 +107,7 @@ func main() {
 		log.Fatal(err)
 	}
 	req.Header.Set("X-Requested-Auth", "Digest")
-	resp, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -170,10 +167,20 @@ func main() {
 	}
 	// sort the events
 	sort.Sort(ByDtstart{events})
-	// Print the events
-	for _, v := range events {
-		fmt.Println(v)
-	}
+	return events
+}
 
+func main() {
+	// [Load config]
+	loadConfig()
+	// [Register CA]
+	registerCA()
+	// [Get Schedule]
+	scheduled := getSchedule()
+
+	// Print the scheduled events
+	for _, s := range scheduled {
+		fmt.Println(s)
+	}
 	// [Control Loop]
 }
