@@ -48,12 +48,9 @@ func (s ByDtstart) Less(i, j int) bool {
 	return s.Events[i].Dtstart.Before(s.Events[j].Dtstart)
 }
 
-var (
-	config *Config
-	events Events
-)
+var config *Config
 
-const updateFrequency int = 60
+const updateFrequency time.Duration = 60
 
 func loadConfig() {
 	file, err := ioutil.ReadFile("config.json")
@@ -97,7 +94,8 @@ func registerCA() {
 	}
 }
 
-func getSchedule() Events {
+func getSchedule() {
+	var events Events
 	client := &http.Client{}
 	req, err := http.NewRequest(
 		"GET",
@@ -167,8 +165,10 @@ func getSchedule() Events {
 	}
 	// sort the events
 	sort.Sort(ByDtstart{events})
-	return events
+	ch <- events
 }
+
+var ch = make(chan Events)
 
 func main() {
 	// [Load config]
@@ -176,11 +176,18 @@ func main() {
 	// [Register CA]
 	registerCA()
 	// [Get Schedule]
-	scheduled := getSchedule()
+	go getSchedule()
 
-	// Print the scheduled events
-	for _, s := range scheduled {
-		fmt.Println(s)
-	}
 	// [Control Loop]
+	for {
+		select {
+		case events := <-ch:
+			// Print the scheduled events
+			for _, e := range events {
+				fmt.Println(e)
+			}
+		case <-time.After(updateFrequency * time.Second):
+			go getSchedule()
+		}
+	}
 }
