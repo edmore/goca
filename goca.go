@@ -197,10 +197,9 @@ func recordingState(recordingId, state string) {
 
 func startCapture(e *Event) {
 	now := getTimeStamp()
-	log.Println("Starting capture  id : ", e.Uid)
-
+	log.Println("Starting capture ", e.Uid)
 	duration := e.Dtend.Sub(now)
-	log.Println("Duration is :", duration)
+	log.Println("Duration set to ", duration)
 	recordingId := strconv.Itoa(e.Uid)
 	recordingName := "recording-" + recordingId
 	recordingDir := config.CaptureDir + "/" + recordingName
@@ -234,7 +233,8 @@ func main() {
 		case events := <-ch:
 			// Update and Print the updated schedule
 			scheduled = events
-			log.Println("Schedule Updated ...")
+			log.Println("Schedule update successful.")
+			// TODO : Get the start of capture just right
 		case <-time.After(2 * time.Second):
 			now := getTimeStamp()
 			if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
