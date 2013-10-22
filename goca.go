@@ -171,20 +171,22 @@ func getSchedule() {
 var ch = make(chan Events)
 
 func main() {
+	var scheduled Events
 	// [Load config]
 	loadConfig()
 	// [Register CA]
 	registerCA()
 	// [Get Schedule]
 	go getSchedule()
-
 	// [Control Loop]
 	for {
 		select {
 		case events := <-ch:
-			// Print the scheduled events
-			for _, e := range events {
-				fmt.Println(e)
+			// Print the updated schedule
+			scheduled = events
+			fmt.Println("Schedule Updated ...")
+			for _, s := range scheduled {
+				fmt.Println(s)
 			}
 		case <-time.After(updateFrequency * time.Second):
 			go getSchedule()
