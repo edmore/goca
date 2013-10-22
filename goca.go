@@ -188,6 +188,8 @@ func startCapture(e *Event) {
 	// Set state
 	state = "capturing"
 	go registerCA(state)
+	// TODO : change recording state
+	// TODO : record from streams
 }
 
 var ch = make(chan Events)
