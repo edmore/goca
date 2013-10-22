@@ -50,7 +50,7 @@ func (s ByDtstart) Less(i, j int) bool {
 
 var config *Config
 
-const updateFrequency time.Duration = 60
+const updateFrequency time.Duration = 60 * time.Second
 
 func loadConfig() {
 	file, err := ioutil.ReadFile("config.json")
@@ -173,7 +173,7 @@ func getSchedule() {
 	ch <- events
 }
 
-func startCapture(e *Event){
+func startCapture(e *Event) {
 	fmt.Println("Starting capture  id : %d", e.Uid)
 }
 
@@ -181,6 +181,7 @@ var ch = make(chan Events)
 
 func main() {
 	var scheduled Events
+	var lastUpdate time.Time = getTimeStamp()
 	// [Load config]
 	loadConfig()
 	// [Register CA]
@@ -197,12 +198,14 @@ func main() {
 			for _, s := range scheduled {
 				fmt.Println(s)
 			}
-		case <-time.After(updateFrequency * time.Second):
-			go getSchedule()
-		case <-time.After(5 * time.Second):
+		case <-time.After(2 * time.Second):
 			currentTime := getTimeStamp()
-			if currentTime.After(scheduled[0].Dtstart) || currentTime.Equal(scheduled[0].Dtstart){
+			if currentTime.After(scheduled[0].Dtstart) || currentTime.Equal(scheduled[0].Dtstart) {
 				go startCapture(scheduled[0])
+			}
+			if currentTime.Sub(lastUpdate) > updateFrequency {
+				go getSchedule()
+				lastUpdate = getTimeStamp()
 			}
 		}
 	}
