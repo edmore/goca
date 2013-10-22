@@ -40,6 +40,7 @@ func SetDigestAuth(r *http.Request, username, password string, resp *http.Respon
 	auth := GetAuthorization(username, password, resp)
 	auth_str := GetAuthString(auth, r.URL, r.Method, nc)
 	r.Header.Add("Authorization", auth_str)
+	// TODO : Need to return multiple values i.e. error value
 	return r
 }
 
