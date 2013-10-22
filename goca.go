@@ -214,8 +214,10 @@ func startCapture(e *Event) {
 	// TODO : record from streams
 }
 
-var ch = make(chan Events)
-var state string
+var (
+	ch    = make(chan Events)
+	state string
+)
 
 func main() {
 	state = "idle"
