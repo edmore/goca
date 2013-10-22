@@ -199,11 +199,11 @@ func main() {
 				fmt.Println(s)
 			}
 		case <-time.After(2 * time.Second):
-			currentTime := getTimeStamp()
-			if currentTime.After(scheduled[0].Dtstart) || currentTime.Equal(scheduled[0].Dtstart) {
+			now := getTimeStamp()
+			if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
 				go startCapture(scheduled[0])
 			}
-			if currentTime.Sub(lastUpdate) > updateFrequency {
+			if now.Sub(lastUpdate) > updateFrequency {
 				go getSchedule()
 				lastUpdate = getTimeStamp()
 			}
