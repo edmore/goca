@@ -4,7 +4,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/edmore/goca/auth"
 	"io/ioutil"
 	"log"
@@ -198,10 +197,10 @@ func recordingState(recordingId, state string) {
 
 func startCapture(e *Event) {
 	now := getTimeStamp()
-	fmt.Println("Starting capture  id : ", e.Uid)
+	log.Println("Starting capture  id : ", e.Uid)
 
 	duration := e.Dtend.Sub(now)
-	fmt.Println(duration)
+	log.Println("Duration is :", duration)
 	recordingId := strconv.Itoa(e.Uid)
 	recordingName := "recording-" + recordingId
 	recordingDir := config.CaptureDir + "/" + recordingName
@@ -235,10 +234,7 @@ func main() {
 		case events := <-ch:
 			// Update and Print the updated schedule
 			scheduled = events
-			fmt.Println("Schedule Updated ...")
-			for _, s := range scheduled {
-				fmt.Println(s)
-			}
+			log.Println("Schedule Updated ...")
 		case <-time.After(2 * time.Second):
 			now := getTimeStamp()
 			if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
