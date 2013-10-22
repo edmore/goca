@@ -23,6 +23,7 @@ type Config struct {
 	Name           string // the Capture Agent Name
 	DigestUser     string // Digest User
 	DigestPassword string // Digest Password
+	CaptureDir     string // Directory for captures
 }
 
 type Event struct {
@@ -76,12 +77,12 @@ func getTimeStamp() time.Time {
 	return t
 }
 
-func registerCA() {
+func registerCA(state string) {
 	client := &http.Client{}
 	hostName, _ := os.Hostname()
 	req, err := http.NewRequest(
 		"POST",
-		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+hostName+":8080&state=idle",
+		config.AdminServerURL+"/capture-admin/agents/"+config.Name+"?address=http://"+hostName+":8080&state="+state,
 		nil)
 	if err != nil {
 		log.Fatal(err)
@@ -174,18 +175,32 @@ func getSchedule() {
 }
 
 func startCapture(e *Event) {
+	now := getTimeStamp()
 	fmt.Println("Starting capture  id : %d", e.Uid)
+
+	duration := e.Dtend.Sub(now)
+	fmt.Println(duration)
+	recordingId := e.Uid
+	recordingName := "recording-" + strconv.Itoa(recordingId)
+	recordingDir := config.CaptureDir + "/" + recordingName
+	os.MkdirAll(recordingDir, 0755)
+
+	// Set state
+	state = "capturing"
+	go registerCA(state)
 }
 
 var ch = make(chan Events)
+var state string
 
 func main() {
+	state = "idle"
 	var scheduled Events
 	var lastUpdate time.Time = getTimeStamp()
 	// [Load config]
 	loadConfig()
 	// [Register CA]
-	registerCA()
+	registerCA(state)
 	// [Get Schedule]
 	go getSchedule()
 	// [Control Loop]
@@ -200,7 +215,7 @@ func main() {
 			}
 		case <-time.After(2 * time.Second):
 			now := getTimeStamp()
-			if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
+			if (now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart)) && state == "idle" {
 				go startCapture(scheduled[0])
 			}
 			if now.Sub(lastUpdate) > updateFrequency {
