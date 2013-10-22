@@ -182,7 +182,7 @@ func main() {
 	for {
 		select {
 		case events := <-ch:
-			// Print the updated schedule
+			// Update and Print the updated schedule
 			scheduled = events
 			fmt.Println("Schedule Updated ...")
 			for _, s := range scheduled {
@@ -190,6 +190,8 @@ func main() {
 			}
 		case <-time.After(updateFrequency * time.Second):
 			go getSchedule()
+		case <-time.After(5 * time.Second):
+			fmt.Println("Check if you can start capture ...")
 		}
 	}
 }
