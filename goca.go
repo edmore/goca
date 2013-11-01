@@ -239,9 +239,11 @@ func main() {
 			// TODO : Get the start of capture just right
 		case <-time.After(2 * time.Second):
 			now := getTimeStamp()
-			if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
-				if state == "idle" {
-					go startCapture(scheduled[0])
+			if len(scheduled) != 0 {
+				if now.After(scheduled[0].Dtstart) || now.Equal(scheduled[0].Dtstart) {
+					if state == "idle" {
+						go startCapture(scheduled[0])
+					}
 				}
 			}
 			if now.Sub(lastUpdate) > updateFrequency {
